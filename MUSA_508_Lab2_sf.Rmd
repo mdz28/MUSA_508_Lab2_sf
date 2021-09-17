@@ -4,8 +4,10 @@ author: "Matt Harris"
 date: "MUSA 508, Fall, 2021"
 output:
   html_document:
-    toc: true
-    toc_float: true
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
 ---
 
 ```{r setup, include=FALSE}

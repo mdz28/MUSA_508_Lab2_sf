@@ -64,9 +64,13 @@ Steps in this assignment:
 ## Load data from {tidycensus}
 
 ```{r acs_vars, cache = TRUE, message = FALSE, warning = FALSE, results=FALSE}
-acs_vars <- c( "[PUT YOUR VAR CODES HERE]")
+acs_vars <- c( "B08014_002", # Estimate!!Total:!!No vehicle available
+               "B08141_016") # Estimate!!Total:!!Public transportation to work (excluding taxicab)
 
-myTracts <- c("[YOUR TRACTS GEOIDs HERE]")
+myTracts <- c("42101016100",
+              "42101016000",
+              "42101015800",
+              "42101015700")
 
 acsTractsPHL.2019.sf <- get_acs(geography = "tract",
                              year = 2019,
@@ -76,9 +80,10 @@ acsTractsPHL.2019.sf <- get_acs(geography = "tract",
                              county = "Philadelphia",
                              output = "wide") %>%
   dplyr::select (GEOID, NAME, all_of(paste0(acs_vars,"E"))) %>%
-  rename ("[RENAME YOUR VARIABLES HERE]") %>%
+  rename (total_no_vehicle = B08014_002E,
+          total_transit_to_work = B08141_016E) %>%
   mutate(Neighborhood = ifelse(GEOID %in% myTracts,
-                               "[YOUR NEIGHBORHOOD NAME HERE]",
+                               "FISHTOWN",
                                "REST OF PHILADELPHIA"))
 ```
 
@@ -86,24 +91,24 @@ acsTractsPHL.2019.sf <- get_acs(geography = "tract",
 
 ```{r}
 acsTractsPHL.2019.sf <- acsTractsPHL.2019.sf %>% 
-  st_transform(crs = "[PUT THE WGS84 EPSG CODE HERE]")
+  st_transform(crs = 4326)
 ```
 
 ## Plot with {ggplot2}
 
 ```{r ggplot_geom_sf, warning = FALSE, echo = FALSE}
 ggplot()+
-  geom_sf(data = acsTractsPHL.2019.sf, aes(fill = "[YOUR VARIABLE NAME HERE]"),
+  geom_sf(data = acsTractsPHL.2019.sf, aes(fill = total_transit_to_work),
           color = "transparent")+
   geom_sf(data = acsTractsPHL.2019.sf %>%
-            filter(Neighborhood == "[YOUR NEIGHBORHOOD NAME HERE]") %>%
+            filter(Neighborhood == "FISHTOWN") %>%
             st_union(),
           color = "white",
           fill = "transparent")+
   # Bonus to figure out different color ramps with scale_fill_viridis()
   labs(
-    title = "[YOUR TITLE HERE]",
-    subtitle = "[YOUR SUBTITLE HERE]",
-    caption = "[YOUR CAPTION HERE]")
+    title = "Raw Number of People Who Take Transit to Work",
+    subtitle = "Special Focus on Fishtown, Philadelphia",
+    caption = "Data: US Census Bureau, ACS 5-year estimates")
 
 ```
